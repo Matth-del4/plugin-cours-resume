@@ -1,46 +1,44 @@
-document.getElementById("btnResumer").addEventListener("click", async () => {
-  // 1. Récupérer l'onglet actif
+//  déclaration de la fonction avec prompt comme paramètre
+async function analyserPage(prompt) {
+
+  //  récupérer l'onglet actif — trouver sur quel onglet l'utilisateur est en ce moment
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-  // 2. Lire le contenu de la page
+  // récupérer le contenu texte de la page
   const result = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: () => document.body.innerText,
   });
   const text = result[0].result;
 
-  // 3. Message d'attente
-  document.getElementById("result").innerText = "Résumer en cours...";
+  // message d'attente affiché pendant que l'API travaille
+  document.getElementById("result").innerText = "Analyse en cours...";
 
-  // 4. Appel API Groq
-  const response = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + config.groqApiKey,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 1024,
-        messages: [
-          {
-            role: "user",
-            content:
-              "Résume les points essentiels de ce texte en français :\n\n" +
-              text.substring(0, 5000),
-          },
-        ],
-      }),
+  // appel à l'API Groq via fetch
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + config.groqApiKey,
     },
-  );
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt + "\n\n" + text.substring(0, 5000) }],
+    }),
+  });
 
-  // 5. Traiter la réponse
-  const data = await response.json();
-  console.log(data);
-  const resume = data.choices[0].message.content;
+  const data = await response.json(); // convertir la réponse en objet JS lisible
+  const resume = data.choices[0].message.content; // extraire le texte du résumé
+  document.getElementById("result").innerText = resume; // afficher le résumé dans le popup
 
-  // 6. Afficher le résumé
-  document.getElementById("result").innerText = resume;
+} // ← fermeture de analyserPage
+
+// écouter le clic sur le bouton et lancer la fonction
+document.getElementById("btnResumer").addEventListener("click", () => {
+  analyserPage("Résume les points essentiels de ce texte en français :");
+});
+
+document.getElementById("btnExpliquer").addEventListener("click", () => {
+  analyserPage("Explique ce texte en français de manière pédagogique, comme si tu l'expliquais à un débutant :");
 });
