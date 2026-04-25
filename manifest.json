@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Résumeur de cours",
+  "version": "1.0",
+  "permissions": ["activeTab", "scripting"],
+  "description": "Une extension pour résumer les cours en ligne",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
