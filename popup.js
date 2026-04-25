@@ -22,7 +22,7 @@ document.getElementById("btnResumer").addEventListener("click", async () => {
         Authorization: "Bearer " + config.groqApiKey,
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
+        model: "llama-3.3-70b-versatile",
         max_tokens: 1024,
         messages: [
           {
@@ -38,6 +38,7 @@ document.getElementById("btnResumer").addEventListener("click", async () => {
 
   // 5. Traiter la réponse
   const data = await response.json();
+  console.log(data);
   const resume = data.choices[0].message.content;
 
   // 6. Afficher le résumé
